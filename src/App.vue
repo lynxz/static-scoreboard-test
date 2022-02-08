@@ -7,8 +7,12 @@ export default {
   name: "App",
   data() {
     return {
-      value: "World"
+      value: []
     };
+  },
+  async mounted() {
+    const { scores } = await (await fetch("/api/GetEntries")).json();
+    this.value = scores;
   }
 };
 </script>

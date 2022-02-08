@@ -7,8 +7,9 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
+using Azure.Data.Tables;
+using System.Linq;
 
 namespace StaticScoreboard.GetEntries
 {
@@ -16,35 +17,45 @@ namespace StaticScoreboard.GetEntries
     {
         [FunctionName("GetEntries")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            [Table("Scoreboard", Connection = "AzureWebJobsStorage")] CloudTable cloudTable,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var query = new TableQuery<ScoreEntity>().Take(100);
-            var items = new List<ScoreEntity>();
-            TableContinuationToken token = null;
-
-            do
+            try
             {
-                var seg = await cloudTable.ExecuteQuerySegmentedAsync(query, token);
-                token = seg.ContinuationToken;
-                items.AddRange(seg.Results);
-            } while (token != null);
+                var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                var tableClient = new TableClient(connectionString, "Scoreboard");
+                var entities = tableClient.Query<TableEntity>();
+                var items = entities.Select(e => MapTableEntityToScoreModel(e)).ToList();
 
-            return new JsonResult(items);
+                return new JsonResult(items);
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, "Failed to get scoreboard data");
+                return new JsonResult(Enumerable.Empty<ScoreModel>().ToList());
+            }
+        }
+
+        public static ScoreModel MapTableEntityToScoreModel(TableEntity entity)
+        {
+            var score = new ScoreModel();
+            score.Board = entity.PartitionKey;
+            score.UserName = entity.RowKey;
+            score.Date = entity.Timestamp?.DateTime ?? DateTime.MinValue;
+            score.Score = entity.GetInt64("Score") ?? 0L;
+
+            return score;
         }
     }
 
-    public class ScoreEntity : TableEntity
+
+
+    public class ScoreModel
     {
 
-        public ScoreEntity(string game, string userName)
-        {
-            PartitionKey = game;
-            RowKey = userName;
-        }
+        public string Board { get; set; }
 
-        public ScoreEntity() { }
+        public string UserName { get; set; }
 
         public long Score { get; set; }
 
