@@ -1,13 +1,10 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using Azure.Data.Tables;
 using System.Linq;
 
@@ -22,10 +19,10 @@ namespace StaticScoreboard.GetEntries
         {
             try
             {
-                var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
                 var entities = tableClient.Query<TableEntity>();
-                var items = entities.Select(e => MapTableEntityToScoreModel(e)).ToList();
+                var items = entities.Select(e => MapTableEntityToScoreModel(e)).OrderByDescending(s => s.Score).Take(100).ToList();
 
                 return new JsonResult(items);
             }
