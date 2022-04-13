@@ -8,23 +8,31 @@ using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
 
-namespace StaticScoreboard.GetEntries
+namespace api
 {
     public static class GetEntries
     {
         [FunctionName("GetEntries")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getentries/{boardName:alpha}")] HttpRequest req,
+            string boardName,
             ILogger log)
         {
             try
             {
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
-                var entities = tableClient.Query<TableEntity>();
-                var items = entities.Select(e => MapTableEntityToScoreModel(e)).OrderByDescending(s => s.Score).Take(100).ToList();
 
-                return new JsonResult(items);
+                var lowScore = (await tableClient.GetEntityAsync<LowScoreEntity>(boardName, "LowScore")).Value;
+
+                var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.Score).ToListAsync();
+
+                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(100).Select(s => new ScoreModel {
+                    Board = s.PartitionKey,
+                    UserName = s.UserName,
+                    Date = s.Timestamp.Value.DateTime,
+                    Score = s.Score
+                }).ToList());
             }
             catch (Exception e)
             {
@@ -32,31 +40,5 @@ namespace StaticScoreboard.GetEntries
                 return new JsonResult(Enumerable.Empty<ScoreModel>().ToList());
             }
         }
-
-        public static ScoreModel MapTableEntityToScoreModel(TableEntity entity)
-        {
-            var score = new ScoreModel();
-            score.Board = entity.PartitionKey;
-            score.UserName = entity.RowKey;
-            score.Date = entity.Timestamp?.DateTime ?? DateTime.MinValue;
-            score.Score = entity.GetInt64("Score") ?? 0L;
-
-            return score;
-        }
-    }
-
-
-
-    public class ScoreModel
-    {
-
-        public string Board { get; set; }
-
-        public string UserName { get; set; }
-
-        public long Score { get; set; }
-
-        public DateTime Date { get; set; }
-
     }
 }
