@@ -14,7 +14,7 @@ namespace api
     {
         [FunctionName("GetEntries")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getentries/{boardName:alpha}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getentries/{boardName}")] HttpRequest req,
             string boardName,
             ILogger log)
         {

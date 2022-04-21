@@ -17,7 +17,7 @@ namespace api
     {
         [FunctionName("UploadScore")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "uploadScore/{boardName:alpha}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "uploadScore/{boardName}")] HttpRequest req,
             string boardName,
             ILogger log)
         {

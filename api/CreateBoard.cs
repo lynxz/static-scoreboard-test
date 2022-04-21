@@ -14,7 +14,7 @@ namespace api
     {
         [FunctionName("CreateBoard")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createboard/{boardName:alpha}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createboard/{boardName}")] HttpRequest req,
             string boardName,
             ILogger log)
         {
