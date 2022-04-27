@@ -24,7 +24,7 @@ namespace api
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var data = JsonConvert.DeserializeObject<ScoreDto>(requestBody);
+            var data = JsonConvert.DeserializeObject<UploadScoreDto>(requestBody);
 
             var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             var tableClient = new TableClient(connectionString, "Scoreboard");
@@ -74,18 +74,7 @@ namespace api
         }
     }
 
-
-    public class LowScoreEntity : ITableEntity
-    {
-        public long Score { get; set; }
-        public int Count { get; set; }
-        public string PartitionKey { get; set; }
-        public string RowKey { get; set; }
-        public DateTimeOffset? Timestamp { get; set; }
-        public ETag ETag { get; set; }
-    }
-
-    public class ScoreDto
+    public class UploadScoreDto
     {
 
         public string UserName { get; set; }

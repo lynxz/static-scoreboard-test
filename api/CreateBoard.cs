@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
+using System.Web.Http;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace api
 {
@@ -14,12 +17,14 @@ namespace api
     {
         [FunctionName("CreateBoard")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createboard/{boardName}")] HttpRequest req,
-            string boardName,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createboard")] HttpRequest req,
             ILogger log)
         {
             try
             {
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var createBoardRequest = JsonConvert.DeserializeObject<CreateBoardRequestDto>(requestBody);
+
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
@@ -28,11 +33,14 @@ namespace api
                 {
                     await tableClient.AddEntityAsync(new ScoreboardTokenEntity
                     {
-                        PartitionKey = boardName,
-                        Token = token
+                        PartitionKey = createBoardRequest.BoardName,
+                        Email = createBoardRequest.Email,
+                        Token = token,
+                        NumberOfEntries = 100
                     });
-                    await tableClient.AddEntityAsync(new LowScoreEntity {
-                        PartitionKey = boardName,
+                    await tableClient.AddEntityAsync(new LowScoreEntity
+                    {
+                        PartitionKey = createBoardRequest.BoardName,
                         RowKey = "LowScore",
                         Score = -1
                     });
@@ -42,14 +50,13 @@ namespace api
                     return new JsonResult(e);
                 }
 
-                return new JsonResult(new { Name = boardName, Token = token });
+                return new JsonResult(new { Name = createBoardRequest.BoardName, Token = token });
             }
             catch (Exception e)
             {
-                log.LogError(e, "Failed to get scoreboard data");
-                return new JsonResult(Enumerable.Empty<ScoreModel>().ToList());
+                log.LogError(e, "Failed to create scoreboard");
+                return new InternalServerErrorResult();
             }
         }
     }
-
 }

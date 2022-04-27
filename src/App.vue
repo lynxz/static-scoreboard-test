@@ -81,10 +81,8 @@
             Register
           </button>
           <div v-show="showToken">
-            <p>
-              This is your scoreboard token, guard it with your life.
-            </p>
-            <h1>{{token}}</h1>
+            <p>This is your scoreboard token, guard it with your life.</p>
+            <h3>{{ token }}</h3>
           </div>
         </div>
         <div class="product-device shadow-sm d-none d-md-block"></div>
@@ -157,32 +155,40 @@ export default {
   name: "App",
   data() {
     return {
-      boardName: '',
-      name: '',
-      email: '',
-      token: '',
+      boardName: "",
+      name: "",
+      email: "",
+      token: "",
       showToken: false,
     };
   },
   methods: {
     async submit() {
-      const result = await fetch(`/api/createboard/${this.boardName}`, {method: 'POST'});
+      const result = await fetch(`/api/createboard`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          boardName: this.boardName,
+          email: this.email,
+        })
+      });
       console.log(result);
       let data = await result.json();
 
       if (result.ok) {
         this.token = data.token;
         this.name = data.name;
-        this.boardName = '';
-        this.email = '';
+        this.boardName = "";
+        this.email = "";
         this.showToken = true;
       } else {
         this.showToken = false;
-        this.token = '';
-        this.name = '';
+        this.token = "";
+        this.name = "";
         console.log(data);
       }
-      
     },
   },
 };

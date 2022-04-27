@@ -27,7 +27,7 @@ namespace api
 
                 var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.Score).ToListAsync();
 
-                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(100).Select(s => new ScoreModel {
+                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(100).Select(s => new ScoreResponseDto {
                     Board = s.PartitionKey,
                     UserName = s.UserName,
                     Date = s.Timestamp.Value.DateTime,
@@ -37,7 +37,7 @@ namespace api
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get scoreboard data");
-                return new JsonResult(Enumerable.Empty<ScoreModel>().ToList());
+                return new JsonResult(Enumerable.Empty<ScoreResponseDto>().ToList());
             }
         }
     }

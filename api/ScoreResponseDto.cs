@@ -2,7 +2,7 @@ using System;
 
 namespace api
 {
-    public class ScoreModel
+    public class ScoreResponseDto
     {
 
         public string Board { get; set; }
