@@ -29,8 +29,8 @@ namespace api
             var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             var tableClient = new TableClient(connectionString, "Scoreboard");
 
-            var scoreboardTokenResponse = await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token");
-            if (scoreboardTokenResponse.Value.Token != data.Token) {
+            var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
+            if (scoreboardEntity.Token != data.Token) {
                 return new BadRequestObjectResult("Invalid token");
             }
 
@@ -65,7 +65,7 @@ namespace api
             if (lowScore.Score < data.Score)
             {
                 var entries = await tableClient.QueryAsync<ScoreEntity>(c => c.PartitionKey == boardName && c.RowKey != "LowScore" && c.Score >= lowScore.Score).ToListAsync();
-                var lowest = entries.OrderByDescending(s => s.Score).Take(100).Last();
+                var lowest = entries.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Last();
                 lowScore.Score = lowest.Score;
                 await tableClient.UpdateEntityAsync(lowScore, ETag.All);
             }

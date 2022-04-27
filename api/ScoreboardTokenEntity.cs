@@ -18,7 +18,7 @@ namespace api
 
         public string Email { get; set; }
 
-        public int NumberOfEntries { get; set; } = 100;
+        public int NumberOfEntries { get; set; }
     }
 
 }

@@ -24,10 +24,11 @@ namespace api
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
                 var lowScore = (await tableClient.GetEntityAsync<LowScoreEntity>(boardName, "LowScore")).Value;
+                var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
 
                 var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.Score).ToListAsync();
 
-                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(100).Select(s => new ScoreResponseDto {
+                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Select(s => new ScoreResponseDto {
                     Board = s.PartitionKey,
                     UserName = s.UserName,
                     Date = s.Timestamp.Value.DateTime,
