@@ -26,10 +26,16 @@
         aria-describedby="email"
       />
     </div>
-    <button class="btn btn-outline-secondary" @click="submit">Register</button>
-    <div v-show="showToken">
+    <button class="btn btn-outline-secondary mb-3" @click="submit">
+      Register
+    </button>
+    <div v-show="showToken" class="alert alert-success" role="alert">
       <p>This is your scoreboard token, guard it with your life.</p>
-      <h3>{{ token }}</h3>
+      <h5>{{ token }}</h5>
+    </div>
+    <div v-show="showConflict" class="alert alert-danger" role="alert">
+      Sorry, a board with that name seems to already exist. Please choose
+      another name.
     </div>
   </div>
 </template>
@@ -44,10 +50,12 @@ export default {
       email: "",
       token: "",
       showToken: false,
+      showConflict: false,
     };
   },
   methods: {
     async submit() {
+      this.showConflict = false;
       const result = await fetch(`/api/createboard`, {
         method: "POST",
         headers: {
@@ -59,19 +67,21 @@ export default {
         }),
       });
       console.log(result);
-      let data = await result.json();
 
       if (result.ok) {
+        console.log("success");
+        let data = await result.json();
         this.token = data.token;
         this.name = data.name;
         this.boardName = "";
         this.email = "";
         this.showToken = true;
       } else {
+        console.log("failed");
         this.showToken = false;
         this.token = "";
         this.name = "";
-        console.log(data);
+        if (result.status == 409) this.showConflict = true;
       }
     },
   },

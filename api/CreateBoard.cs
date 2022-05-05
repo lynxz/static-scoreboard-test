@@ -10,6 +10,7 @@ using System.Linq;
 using System.Web.Http;
 using System.IO;
 using Newtonsoft.Json;
+using Azure;
 
 namespace api
 {
@@ -45,9 +46,12 @@ namespace api
                         Score = -1
                     });
                 }
-                catch (Exception e)
+                catch (RequestFailedException requestFailed)
                 {
-                    return new JsonResult(e);
+                    if (requestFailed.Status == 409)
+                        return new Microsoft.AspNetCore.Mvc.ConflictResult();
+
+                    return new InternalServerErrorResult();
                 }
 
                 return new JsonResult(new { Name = createBoardRequest.BoardName, Token = token });
