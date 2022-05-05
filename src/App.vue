@@ -49,7 +49,8 @@
             got you covered.
           </p>
           <p>Go ahead, create a scoreboard.</p>
-          <div class="input-group mb-3">
+          <RegisterBoard />
+          <!-- <div class="input-group mb-3">
             <div class="input-group-prepend">
               <span class="input-group-text" id="scoreboard-name">
                 Scoreboard
@@ -83,7 +84,7 @@
           <div v-show="showToken">
             <p>This is your scoreboard token, guard it with your life.</p>
             <h3>{{ token }}</h3>
-          </div>
+          </div> -->
         </div>
         <div class="product-device shadow-sm d-none d-md-block"></div>
         <div
@@ -151,45 +152,12 @@
 </template>
 
 <script>
+import RegisterBoard from './RegisterBoard.vue';
+
 export default {
   name: "App",
-  data() {
-    return {
-      boardName: "",
-      name: "",
-      email: "",
-      token: "",
-      showToken: false,
-    };
-  },
-  methods: {
-    async submit() {
-      const result = await fetch(`/api/createboard`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          boardName: this.boardName,
-          email: this.email,
-        })
-      });
-      console.log(result);
-      let data = await result.json();
-
-      if (result.ok) {
-        this.token = data.token;
-        this.name = data.name;
-        this.boardName = "";
-        this.email = "";
-        this.showToken = true;
-      } else {
-        this.showToken = false;
-        this.token = "";
-        this.name = "";
-        console.log(data);
-      }
-    },
+  components: {
+    RegisterBoard
   },
 };
 </script>
