@@ -26,7 +26,7 @@
         aria-describedby="email"
       />
     </div>
-    <button class="btn btn-outline-secondary mb-3" @click="submit">
+    <button class="btn btn-outline-secondary mb-3" @click="submit" :disabled="isDisabled">
       Register
     </button>
     <div v-show="showToken" class="alert alert-success" role="alert">
@@ -52,6 +52,16 @@ export default {
       showToken: false,
       showConflict: false,
     };
+  },
+  computed: {
+      isDisabled() {
+          let validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+          let isBoardNameSet = !(!this.boardName || this.boardName.length === 0)
+          let isEmailSet = this.email.match(validRegex);
+          console.log("Is Email Set: " + isEmailSet);
+          console.log("Is Boardname Set: "  + isBoardNameSet)
+          return !(isBoardNameSet && isEmailSet);
+      }
   },
   methods: {
     async submit() {
