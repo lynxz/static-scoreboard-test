@@ -58,8 +58,6 @@ export default {
           let validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
           let isBoardNameSet = !(!this.boardName || this.boardName.length === 0)
           let isEmailSet = this.email.match(validRegex);
-          console.log("Is Email Set: " + isEmailSet);
-          console.log("Is Boardname Set: "  + isBoardNameSet)
           return !(isBoardNameSet && isEmailSet);
       }
   },
