@@ -1,20 +1,28 @@
 import { createApp } from 'vue'
+import {createRouter, createWebHashHistory} from 'vue-router'
 import App from './App.vue'
+import HomeRegister from './HomeRegister.vue'
+import AboutInfo from './AboutInfo.vue'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
-//import moment from 'moment'
 
-// Vue.config.productionTip = false
+// 2. Define some routes
+// Each route should map to a component.
+// We'll talk about nested routes later.
+const routes = [
+  { path: '/', component: HomeRegister },
+  { path: '/about', component: AboutInfo },
+]
 
-// Vue.filter('formatDate', function(value) {
-//   if (value) {
-//     return moment(String(value)).format('YYYY-MM-DD hh:mm')
-//   }
-// })
-
-// new Vue({
-//   render: h => h(App),
-// }).$mount('#app')
+// 3. Create the router instance and pass the `routes` option
+// You can pass in additional options here, but let's
+// keep it simple for now.
+const router = createRouter({
+  // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
+  history: createWebHashHistory(),
+  routes, // short for `routes: routes`
+})
 
 const app = createApp(App)
+app.use(router)
 app.mount('#app')

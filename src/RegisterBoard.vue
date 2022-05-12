@@ -77,7 +77,6 @@ export default {
       console.log(result);
 
       if (result.ok) {
-        console.log("success");
         let data = await result.json();
         this.token = data.token;
         this.name = data.name;
@@ -85,7 +84,6 @@ export default {
         this.email = "";
         this.showToken = true;
       } else {
-        console.log("failed");
         this.showToken = false;
         this.token = "";
         this.name = "";

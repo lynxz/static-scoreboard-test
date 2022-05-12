@@ -4,7 +4,7 @@
       <nav
         class="container d-flex flex-column flex-md-row justify-content-between"
       >
-        <a class="py-2" href="#" aria-label="Product">
+        <router-link class="py-2"  to="/" aria-label="Product">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -24,10 +24,12 @@
               d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"
             />
           </svg>
-        </a>
-        <a class="py-2 d-none d-md-inline-block" href="#">Product</a>
+        </router-link>
+        <!-- <a class="py-2 d-none d-md-inline-block" href="#">Product</a>
         <a class="py-2 d-none d-md-inline-block" href="#">Features</a>
-        <a class="py-2 d-none d-md-inline-block" href="#">Pricing</a>
+        <a class="py-2 d-none d-md-inline-block" href="#">Pricing</a> -->
+        <router-link class="py-2 d-none d-md-inline-block" to="/">Register</router-link>
+        <router-link class="py-2 d-none d-md-inline-block" to="/about">About</router-link>
       </nav>
     </header>
 
@@ -42,50 +44,7 @@
           bg-light
         "
       >
-        <div class="col-md-5 p-lg-5 mx-auto my-5">
-          <h1 class="display-4 fw-normal">Scoreboards Inc</h1>
-          <p class="lead fw-normal">
-            Need somewhere to put your point data and get it back in order? We
-            got you covered.
-          </p>
-          <p>Go ahead, create a scoreboard.</p>
-          <RegisterBoard />
-          <!-- <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="scoreboard-name">
-                Scoreboard
-              </span>
-            </div>
-            <input
-              v-model="boardName"
-              type="text"
-              class="form-control"
-              placeholder="Name"
-              aria-label="ScoreboardName"
-              aria-describedby="scoreboard-name"
-            />
-          </div>
-          <div class="input-group mb-3">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="email">@</span>
-            </div>
-            <input
-              v-model="email"
-              type="text"
-              class="form-control"
-              placeholder="your@user.com"
-              aria-label="Email"
-              aria-describedby="email"
-            />
-          </div>
-          <button class="btn btn-outline-secondary" @click="submit">
-            Register
-          </button>
-          <div v-show="showToken">
-            <p>This is your scoreboard token, guard it with your life.</p>
-            <h3>{{ token }}</h3>
-          </div> -->
-        </div>
+        <router-view></router-view>
         <div class="product-device shadow-sm d-none d-md-block"></div>
         <div
           class="product-device product-device-2 shadow-sm d-none d-md-block"
@@ -152,13 +111,8 @@
 </template>
 
 <script>
-import RegisterBoard from './RegisterBoard.vue';
-
 export default {
   name: "App",
-  components: {
-    RegisterBoard
-  },
 };
 </script>
 
