@@ -7,6 +7,7 @@ namespace api
     public class LowScoreEntity : ITableEntity
     {
         public long Score { get; set; }
+        public int Count {get;set;}
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; }

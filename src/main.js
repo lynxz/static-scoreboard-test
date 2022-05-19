@@ -3,8 +3,11 @@ import {createRouter, createWebHashHistory} from 'vue-router'
 import App from './App.vue'
 import HomeRegister from './HomeRegister.vue'
 import AboutInfo from './AboutInfo.vue'
+import ScoreBoard from './ScoreBoard.vue'
+import moment from 'moment'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
+
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -12,6 +15,7 @@ import "bootstrap";
 const routes = [
   { path: '/', component: HomeRegister },
   { path: '/about', component: AboutInfo },
+  { path: '/scoreboard/:board', component: ScoreBoard}
 ]
 
 // 3. Create the router instance and pass the `routes` option
@@ -25,4 +29,7 @@ const router = createRouter({
 
 const app = createApp(App)
 app.use(router)
+
+app.config.globalProperties.moment = moment;
+
 app.mount('#app')

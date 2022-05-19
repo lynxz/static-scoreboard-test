@@ -11,7 +11,7 @@
           <div class="rank-info">
             <h5>{{ score.userName }}</h5>
             <span>Date Submitted:</span>
-            <span>{{ score.date | formatDate }}</span>
+            <span>{{ formatDate(score.date) }}</span>
           </div>
           <div class="rank-points">
             <span>Points</span>
@@ -25,23 +25,28 @@
 
 <script>
 export default {
-  name: "App-copy",
+  name: "ScoreBoard",
+  computed: {
+    formatDate() {
+      return (d) => {
+        return this.moment(d).format('YYYY-MM-DD hh:mm:ss');
+      }
+    }
+  },
   data() {
     return {
       scores: [],
     };
   },
   async mounted() {
-    const items = await (await fetch("/api/GetEntries")).json();
+    let board = this.$route.params.board;
+    const items = await (await fetch(`/api/getentries/${board}`)).json();
     this.scores = items;
   },
 };
 </script>
 
 <style>
-body {
-  background-color: lightgray;
-}
 
 .score-board {
   margin-left: 20px;
@@ -60,7 +65,7 @@ body {
 .rank-row {
   clear: both;
   padding-bottom: 20px;
-  margin-bottom: 50px;
+  margin-bottom: 60px;
 }
 
 .rank-no {
@@ -97,7 +102,7 @@ body {
 .rank-points {
   float: right;
   text-align: right;
-  padding: 10px;
+  padding-top: 10px;
 }
 
 .rank-points h3 {
