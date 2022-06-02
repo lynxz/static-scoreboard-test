@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
+using Azure;
 
 namespace api
 {
@@ -25,9 +26,9 @@ namespace api
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
                 var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
-                var lowScore = (await tableClient.GetEntityAsync<LowScoreEntity>(boardName, "LowScore")).Value;
+                var lowScore = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "LowScore")).Value;
 
-                var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.Score).ToListAsync();
+                var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.LowScore).ToListAsync();
 
                 return new JsonResult(scores.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Select(s => new ScoreResponseDto {
                     Board = s.PartitionKey,
@@ -35,6 +36,10 @@ namespace api
                     Date = s.Timestamp.Value.DateTime,
                     Score = s.Score
                 }).ToList());
+            }
+            catch (RequestFailedException requestFailedException) {
+                log.LogError(requestFailedException, "Failed to get scoreboard data " + requestFailedException.ToString());
+                return new JsonResult(Enumerable.Empty<ScoreResponseDto>().ToList());
             }
             catch (Exception e)
             {

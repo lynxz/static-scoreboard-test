@@ -17,7 +17,7 @@ namespace api
     {
         [FunctionName("UploadScore")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "uploadScore/{boardName}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "uploadscore/{boardName}")] HttpRequest req,
             string boardName,
             ILogger log)
         {
@@ -45,17 +45,17 @@ namespace api
 
             await tableClient.AddEntityAsync(scoreEntity);
 
-            LowScoreEntity lowScore = null;
+            BoardDataEntity lowScore = null;
             try
             {
-                lowScore = (await tableClient.GetEntityAsync<LowScoreEntity>(boardName, "LowScore")).Value;
+                lowScore = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "LowScore")).Value;
                 Console.WriteLine("Success");
             }
             catch (RequestFailedException ex)
             {
                 if (ex.Status == 404)
                 {
-                    lowScore = new LowScoreEntity { PartitionKey = boardName, RowKey = "LowScore", Score = data.Score };
+                    lowScore = new BoardDataEntity { PartitionKey = boardName, RowKey = "LowScore", LowScore = data.Score };
                     await tableClient.AddEntityAsync(lowScore);
                 }
                 else
@@ -63,11 +63,11 @@ namespace api
                     throw;
                 }
             }
-            if (lowScore.Score < data.Score)
+            if (lowScore.LowScore < data.Score)
             {
-                var entries = await tableClient.QueryAsync<ScoreEntity>(c => c.PartitionKey == boardName && c.RowKey != "LowScore" && c.Score >= lowScore.Score).ToListAsync();
+                var entries = await tableClient.QueryAsync<ScoreEntity>(c => c.PartitionKey == boardName && c.RowKey != "LowScore" && c.Score >= lowScore.LowScore).ToListAsync();
                 var lowest = entries.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Last();
-                lowScore.Score = lowest.Score;
+                lowScore.LowScore = lowest.Score;
 
                 if (lowScore.Count < scoreboardEntity.NumberOfEntries)
                     lowScore.Count++;
@@ -78,7 +78,7 @@ namespace api
             {
                 var entries = await tableClient.QueryAsync<ScoreEntity>(c => c.PartitionKey == boardName && c.RowKey != "LowScore").ToListAsync();
                 var lowest = entries.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Last();
-                lowScore.Score = lowest.Score;
+                lowScore.LowScore = lowest.Score;
                 lowScore.Count++;
 
                 await tableClient.UpdateEntityAsync(lowScore, ETag.All);
@@ -86,16 +86,5 @@ namespace api
 
             return new OkResult();
         }
-    }
-
-    public class UploadScoreDto
-    {
-
-        public string UserName { get; set; }
-
-        public long Score { get; set; }
-
-        public string Token { get; set; }
-
     }
 }

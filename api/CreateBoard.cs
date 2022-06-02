@@ -39,11 +39,11 @@ namespace api
                         Token = token,
                         NumberOfEntries = 100
                     });
-                    await tableClient.AddEntityAsync(new LowScoreEntity
+                    await tableClient.AddEntityAsync(new BoardDataEntity
                     {
                         PartitionKey = createBoardRequest.BoardName,
                         RowKey = "LowScore",
-                        Score = -1
+                        LowScore = -1
                     });
                 }
                 catch (RequestFailedException requestFailed)

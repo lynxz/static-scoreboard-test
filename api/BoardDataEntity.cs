@@ -4,9 +4,9 @@ using Azure;
 
 namespace api
 {
-    public class LowScoreEntity : ITableEntity
+    public class BoardDataEntity : ITableEntity
     {
-        public long Score { get; set; }
+        public long LowScore { get; set; }
         public int Count {get;set;}
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
