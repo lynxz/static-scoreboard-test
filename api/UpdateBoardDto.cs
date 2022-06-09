@@ -5,5 +5,7 @@ namespace api
 
         public int NumberOfEntries { get; set; }
 
+        public string Email { get; set; }
+
     }
 }

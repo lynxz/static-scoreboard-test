@@ -30,6 +30,7 @@
       Register
     </button>
     <div v-show="showToken" class="alert alert-success" role="alert">
+      <h3>{{ name }}</h3>
       <p>This is your scoreboard token, guard it with your life.</p>
       <h5>{{ token }}</h5>
     </div>

@@ -37,6 +37,7 @@ namespace api
                     return new BadRequestObjectResult("Number of entries must be at least 1");
                 
                 scoreboardEntity.NumberOfEntries = updateBoard.NumberOfEntries;
+                scoreboardEntity.Email = updateBoard.Email;
 
                 var response = tableClient.UpdateEntity(scoreboardEntity, Azure.ETag.All);
                 if (response.IsError)

@@ -29,6 +29,7 @@
         <a class="py-2 d-none d-md-inline-block" href="#">Features</a>
         <a class="py-2 d-none d-md-inline-block" href="#">Pricing</a> -->
         <router-link class="py-2 d-none d-md-inline-block" to="/">Register</router-link>
+        <router-link class="py-2 d-none d-md-inline-block" to="/admin">Administrate</router-link>
         <router-link class="py-2 d-none d-md-inline-block" to="/about">About</router-link>
       </nav>
     </header>

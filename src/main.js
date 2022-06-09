@@ -4,6 +4,7 @@ import App from './App.vue'
 import HomeRegister from './HomeRegister.vue'
 import AboutInfo from './AboutInfo.vue'
 import ScoreBoard from './ScoreBoard.vue'
+import UpdateBoard from './UpdateBoard.vue'
 import moment from 'moment'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
@@ -14,6 +15,7 @@ import "bootstrap";
 // We'll talk about nested routes later.
 const routes = [
   { path: '/', component: HomeRegister },
+  { path: '/admin', component: UpdateBoard },
   { path: '/about', component: AboutInfo },
   { path: '/scoreboard/:board', component: ScoreBoard}
 ]
