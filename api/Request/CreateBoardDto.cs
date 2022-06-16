@@ -1,6 +1,6 @@
-namespace api
+namespace Scoreboard.Api.Request
 {
-    public class CreateBoardRequestDto
+    public class CreateBoardDto
     {
 
         public string BoardName { get; set; }

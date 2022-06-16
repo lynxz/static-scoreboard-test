@@ -2,7 +2,7 @@ using System;
 using Azure.Data.Tables;
 using Azure;
 
-namespace api
+namespace Scoreboard.Api
 {
     public class ScoreEntity : ITableEntity
     {

@@ -1,8 +1,8 @@
 using System;
 
-namespace api
+namespace Scoreboard.Api.Response
 {
-    public class ScoreResponseDto
+    public class ScoreDto
     {
 
         public string Board { get; set; }

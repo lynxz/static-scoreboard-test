@@ -1,6 +1,6 @@
 using System;
 
-namespace api
+namespace Scoreboard.Api.Response
 {
     public class ScoreboardDto
     {

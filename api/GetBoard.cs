@@ -6,8 +6,9 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
+using Scoreboard.Api.Response;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class GetBoard
     {

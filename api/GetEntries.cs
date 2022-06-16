@@ -8,8 +8,9 @@ using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
 using Azure;
+using Scoreboard.Api.Response;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class GetEntries
     {
@@ -30,7 +31,7 @@ namespace api
 
                 var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.LowScore).ToListAsync();
 
-                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Select(s => new ScoreResponseDto {
+                return new JsonResult(scores.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Select(s => new ScoreDto {
                     Board = s.PartitionKey,
                     UserName = s.UserName,
                     Date = s.Timestamp.Value.DateTime,
@@ -39,12 +40,12 @@ namespace api
             }
             catch (RequestFailedException requestFailedException) {
                 log.LogError(requestFailedException, "Failed to get scoreboard data " + requestFailedException.ToString());
-                return new JsonResult(Enumerable.Empty<ScoreResponseDto>().ToList());
+                return new JsonResult(Enumerable.Empty<ScoreDto>().ToList());
             }
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get scoreboard data");
-                return new JsonResult(Enumerable.Empty<ScoreResponseDto>().ToList());
+                return new JsonResult(Enumerable.Empty<ScoreDto>().ToList());
             }
         }
     }

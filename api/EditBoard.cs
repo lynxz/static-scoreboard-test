@@ -8,8 +8,9 @@ using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.IO;
 using Newtonsoft.Json;
+using Scoreboard.Api.Request;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class EditBoard
     {

@@ -1,4 +1,4 @@
-namespace api
+namespace Scoreboard.Api.Request
 {
     public class UploadScoreDto
     {

@@ -6,13 +6,13 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
-using System.Linq;
 using System.Web.Http;
 using System.IO;
 using Newtonsoft.Json;
 using Azure;
+using Scoreboard.Api.Request;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class CreateBoard
     {
@@ -24,7 +24,7 @@ namespace api
             try
             {
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var createBoardRequest = JsonConvert.DeserializeObject<CreateBoardRequestDto>(requestBody);
+                var createBoardRequest = JsonConvert.DeserializeObject<CreateBoardDto>(requestBody);
 
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");

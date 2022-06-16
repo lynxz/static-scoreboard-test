@@ -10,8 +10,9 @@ using Newtonsoft.Json;
 using Azure.Data.Tables;
 using Azure;
 using System.Linq;
+using Scoreboard.Api.Request;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class UploadScore
     {

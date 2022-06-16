@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
 
-namespace api
+namespace Scoreboard.Api
 {
     public static class DeleteBoard
     {
