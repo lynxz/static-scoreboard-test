@@ -27,7 +27,7 @@ namespace Scoreboard.Api
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
-                var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
+                var scoreboardEntity = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "Token")).Value;
                 if (scoreboardEntity.Token != token) 
                     return new BadRequestObjectResult("Incorrect Token");
 

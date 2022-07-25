@@ -26,10 +26,13 @@ namespace Scoreboard.Api
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
-                var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
-                var lowScore = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "LowScore")).Value;
+                var scoreboardNameEntity = (await tableClient.GetEntityAsync<BoardNameEntity>(boardName, "Name")).Value;
+                var scoreboardEntity = (await tableClient.GetEntityAsync<BoardDataEntity>(scoreboardNameEntity.Token, "Data")).Value;
 
-                var scores = await tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.LowScore).ToListAsync();
+                var scoreClient = new TableClient(connectionString, boardName);
+                var lowScore = (await scoreClient.GetEntityAsync<BoardScoreCounterEntity>(boardName, "LowScore")).Value;
+
+                var scores = await scoreClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName && s.RowKey != "LowScore" && s.Score >= lowScore.LowScore).ToListAsync();
 
                 return new JsonResult(scores.OrderByDescending(s => s.Score).Take(scoreboardEntity.NumberOfEntries).Select(s => new ScoreDto {
                     Board = s.PartitionKey,

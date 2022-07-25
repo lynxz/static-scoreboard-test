@@ -11,6 +11,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Azure;
 using Scoreboard.Api.Request;
+using Scoreboard.Api.Response;
 
 namespace Scoreboard.Api
 {
@@ -27,21 +28,48 @@ namespace Scoreboard.Api
                 var createBoardRequest = JsonConvert.DeserializeObject<CreateBoardDto>(requestBody);
 
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-                var tableClient = new TableClient(connectionString, "Scoreboard");
+                var scoreboardTableClient = new TableClient(connectionString, "Scoreboard");
 
                 var token = Guid.NewGuid().ToString();
+                var tableName = RandomIdGenerator.GetBase62(8);
                 try
                 {
-                    await tableClient.AddEntityAsync(new ScoreboardTokenEntity
+                    var newTableClient = new TableClient(connectionString, tableName);
+                    await newTableClient.CreateAsync();
+                    
+                    // await scoreboardTableClient.AddEntityAsync(new BoardDataEntity
+                    // {
+                    //     PartitionKey = createBoardRequest.BoardName,
+                    //     Email = createBoardRequest.Email,
+                    //     Token = token,
+                    //     NumberOfEntries = 100
+                    // });
+                    await scoreboardTableClient.AddEntityAsync(new BoardDataEntity
                     {
-                        PartitionKey = createBoardRequest.BoardName,
+                        PartitionKey = token,
+                        RowKey = "Data",
+                        Name = createBoardRequest.BoardName,
+                        TableName = tableName,
                         Email = createBoardRequest.Email,
                         Token = token,
                         NumberOfEntries = 100
                     });
-                    await tableClient.AddEntityAsync(new BoardDataEntity
+                    await scoreboardTableClient.AddEntityAsync(new BoardNameEntity {
+                        PartitionKey = tableName,
+                        RowKey = "Name",
+                        Token = token
+                    });
+
+                    // await scoreboardTableClient.AddEntityAsync(new BoardScoreCounterEntity
+                    // {
+                    //     PartitionKey = createBoardRequest.BoardName,
+                    //     RowKey = "LowScore",
+                    //     LowScore = -1
+                    // });
+
+                     await newTableClient.AddEntityAsync(new BoardScoreCounterEntity
                     {
-                        PartitionKey = createBoardRequest.BoardName,
+                        PartitionKey = tableName,
                         RowKey = "LowScore",
                         LowScore = -1
                     });
@@ -54,7 +82,13 @@ namespace Scoreboard.Api
                     return new InternalServerErrorResult();
                 }
 
-                return new JsonResult(new { Name = createBoardRequest.BoardName, Token = token });
+                return new OkObjectResult(new ScoreboardDto {
+                    Name = createBoardRequest.BoardName,
+                    TableName = tableName,
+                    Email = createBoardRequest.Email,
+                    Token = Guid.Parse(token), 
+                    NumberOfEntries = 100,
+                });
             }
             catch (Exception e)
             {

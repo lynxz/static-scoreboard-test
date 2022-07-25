@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using Scoreboard.Api.Response;
+using Azure;
 
 namespace Scoreboard.Api
 {
@@ -14,7 +15,7 @@ namespace Scoreboard.Api
     {
         [FunctionName("GetBoard")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getboard/{boardName}/{token}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "getboard/{token}")] HttpRequest req,
             string boardName,
             string token,
             ILogger log)
@@ -25,13 +26,23 @@ namespace Scoreboard.Api
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var tableClient = new TableClient(connectionString, "Scoreboard");
 
-                var scoreboardEntity = (await tableClient.GetEntityAsync<ScoreboardTokenEntity>(boardName, "Token")).Value;
-                if (scoreboardEntity.Token != token) {
-                    return new BadRequestObjectResult("Incorrect Token");
+                BoardDataEntity scoreboardEntity = null;
+                try
+                {
+                    scoreboardEntity = (await tableClient.GetEntityAsync<BoardDataEntity>(token, "Data")).Value;
                 }
-                
-                var scoreboard = new ScoreboardDto {
-                    Name = scoreboardEntity.PartitionKey,
+                catch (RequestFailedException ex)
+                {
+                    if (ex.Status == 404)
+                        return new BadRequestObjectResult("Incorrect Token");
+
+                    throw;
+                }
+
+                var scoreboard = new ScoreboardDto
+                {
+                    Name = scoreboardEntity.Name,
+                    TableName = scoreboardEntity.TableName,
                     Email = scoreboardEntity.Email,
                     Token = Guid.Parse(scoreboardEntity.Token),
                     NumberOfEntries = scoreboardEntity.NumberOfEntries

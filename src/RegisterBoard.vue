@@ -33,6 +33,9 @@
       <h3>{{ name }}</h3>
       <p>This is your scoreboard token, guard it with your life.</p>
       <h5>{{ token }}</h5>
+      <p>This is your scoreboard reference, you need to know this as well.</p>
+      <h5>{{ tableName }}</h5>
+      <p>You can access your Scoreboard at http://localhost:4280/#/scoreboard/{{tableName}}</p>
     </div>
     <div v-show="showConflict" class="alert alert-danger" role="alert">
       Sorry, a board with that name seems to already exist. Please choose
@@ -50,6 +53,7 @@ export default {
       name: "",
       email: "",
       token: "",
+      tableName: "",
       showToken: false,
       showConflict: false,
     };
@@ -81,6 +85,7 @@ export default {
         let data = await result.json();
         this.token = data.token;
         this.name = data.name;
+        this.tableName = data.tableName;
         this.boardName = "";
         this.email = "";
         this.showToken = true;
@@ -88,6 +93,7 @@ export default {
         this.showToken = false;
         this.token = "";
         this.name = "";
+        this.tableName = "";
         if (result.status == 409) this.showConflict = true;
       }
     },

@@ -4,21 +4,12 @@ using Azure;
 
 namespace Scoreboard.Api
 {
-    public class ScoreboardTokenEntity : ITableEntity
+    public class BoardNameEntity : ITableEntity
     {
         public string PartitionKey { get; set; }
-
-        public string RowKey { get; set; } = "Token";
-
+        public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; }
-
         public ETag ETag { get; set; }
-
         public string Token { get; set; }
-
-        public string Email { get; set; }
-
-        public int NumberOfEntries { get; set; }
     }
-
 }
