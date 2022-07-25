@@ -22,71 +22,36 @@ namespace Scoreboard.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createboard")] HttpRequest req,
             ILogger log)
         {
+            (bool success, CreateBoardDto createBoardRequest) = await req.GetDataAsync<CreateBoardDto>(log);
+            if (!success)
+                return new BadRequestErrorMessageResult("Failed to parse data");
+
             try
             {
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var createBoardRequest = JsonConvert.DeserializeObject<CreateBoardDto>(requestBody);
-
-                var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-                var scoreboardTableClient = new TableClient(connectionString, "Scoreboard");
-
                 var token = Guid.NewGuid().ToString();
-                var tableName = RandomIdGenerator.GetBase62(8);
-                try
+                var shortName = RandomIdGenerator.GetBase62(8);
+                var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+                var scoreBoardService = ScoreBoardService.Create(connectionString, log);
+                var scoreService = ScoreService.Create(connectionString, shortName, log);
+
+
+                if (!(await scoreBoardService.CreateBoardEntities(token, createBoardRequest.BoardName, shortName, createBoardRequest.Email)))
                 {
-                    var newTableClient = new TableClient(connectionString, tableName);
-                    await newTableClient.CreateAsync();
-                    
-                    // await scoreboardTableClient.AddEntityAsync(new BoardDataEntity
-                    // {
-                    //     PartitionKey = createBoardRequest.BoardName,
-                    //     Email = createBoardRequest.Email,
-                    //     Token = token,
-                    //     NumberOfEntries = 100
-                    // });
-                    await scoreboardTableClient.AddEntityAsync(new BoardDataEntity
-                    {
-                        PartitionKey = token,
-                        RowKey = "Data",
-                        Name = createBoardRequest.BoardName,
-                        TableName = tableName,
-                        Email = createBoardRequest.Email,
-                        Token = token,
-                        NumberOfEntries = 100
-                    });
-                    await scoreboardTableClient.AddEntityAsync(new BoardNameEntity {
-                        PartitionKey = tableName,
-                        RowKey = "Name",
-                        Token = token
-                    });
-
-                    // await scoreboardTableClient.AddEntityAsync(new BoardScoreCounterEntity
-                    // {
-                    //     PartitionKey = createBoardRequest.BoardName,
-                    //     RowKey = "LowScore",
-                    //     LowScore = -1
-                    // });
-
-                     await newTableClient.AddEntityAsync(new BoardScoreCounterEntity
-                    {
-                        PartitionKey = tableName,
-                        RowKey = "LowScore",
-                        LowScore = -1
-                    });
-                }
-                catch (RequestFailedException requestFailed)
-                {
-                    if (requestFailed.Status == 409)
-                        return new Microsoft.AspNetCore.Mvc.ConflictResult();
-
                     return new InternalServerErrorResult();
                 }
 
-                return new OkObjectResult(new ScoreboardDto {
+                if (!(await scoreService.CreateTable()))
+                {
+                    await scoreBoardService.RemoveBoardEntities(token);
+                    return new InternalServerErrorResult();
+                }
+
+                return new OkObjectResult(new ScoreboardDto
+                {
                     Name = createBoardRequest.BoardName,
-                    TableName = tableName,
+                    TableName = shortName,
                     Email = createBoardRequest.Email,
-                    Token = Guid.Parse(token), 
+                    Token = Guid.Parse(token),
                     NumberOfEntries = 100,
                 });
             }

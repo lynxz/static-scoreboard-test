@@ -32,7 +32,22 @@ namespace Scoreboard.Api
             await Client.AddEntityAsync(scoreEntity);
         }
 
-        
+        public async Task<bool> CreateTable() {
+            try {
+                await Client.CreateAsync();
+
+                await Client.AddEntityAsync(new BoardScoreCounterEntity
+                    {
+                        PartitionKey = _boardName,
+                        RowKey = "LowScore",
+                        LowScore = -1
+                    });
+            } catch(Exception e) {
+                _logger.LogError(e, $"Failed to create board {_boardName}");
+                return false;
+            }
+            return true;
+        }
 
         public async Task UpdateScoreCountersAsync(int numberOfEntries, long score) {
             var scoreCounter = await GetScoreCounterEntityAsync(score);
@@ -59,7 +74,7 @@ namespace Scoreboard.Api
             }
         }
 
-        public async Task<BoardScoreCounterEntity> GetScoreCounterEntityAsync(long score) {
+         async Task<BoardScoreCounterEntity> GetScoreCounterEntityAsync(long score) {
             BoardScoreCounterEntity lowScore = null;
             try
             {
@@ -75,12 +90,12 @@ namespace Scoreboard.Api
                 }
                 else
                 {
-                    _logger.LogError($"Failed to get lowScore for {_boardName}", ex);
+                    _logger.LogError(ex, $"Failed to get lowScore for {_boardName}");
                     throw;
                 }
             }
             return lowScore;
         }
     }
-    
+
 }

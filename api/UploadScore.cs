@@ -22,11 +22,13 @@ namespace Scoreboard.Api
         {
             log.LogInformation($"Score uploaded from {req.HttpContext.Connection.RemoteIpAddress}.");
 
+            (bool success, UploadScoreDto data) = await req.GetDataAsync<UploadScoreDto>(log);
+            if (!success)
+                return new BadRequestErrorMessageResult("Failed to parse data");
+              
+
             try
             {
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var data = JsonConvert.DeserializeObject<UploadScoreDto>(requestBody);
-
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
                 var scoreBoardService = ScoreBoardService.Create(connectionString, log);
                 var scoreService = ScoreService.Create(connectionString, boardName, log);

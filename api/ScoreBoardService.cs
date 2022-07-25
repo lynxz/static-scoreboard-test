@@ -20,6 +20,54 @@ namespace Scoreboard.Api
             return service;
         }
 
+        public async Task<bool> CreateBoardEntities(string token, string name, string shortName, string email)
+        {
+            try
+            {
+                await Client.AddEntityAsync(new BoardDataEntity
+                {
+                    PartitionKey = token,
+                    RowKey = "Data",
+                    Name = name,
+                    TableName = shortName,
+                    Email = email,
+                    Token = token,
+                    NumberOfEntries = 100
+                });
+                await Client.AddEntityAsync(new BoardNameEntity
+                {
+                    PartitionKey = shortName,
+                    RowKey = "Name",
+                    Token = token
+                });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Failed to create board entities for {name}");
+                return false;
+            }
+
+
+            return true;
+        }
+
+        public async Task<bool> RemoveBoardEntities(string token)
+        {
+            try
+            {
+                var boardDataEntity = (await Client.GetEntityAsync<BoardDataEntity>(token, "Data"))?.Value;
+                await Client.DeleteEntityAsync(token, "Data");
+                await Client.DeleteEntityAsync(boardDataEntity.TableName, "Name");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Failed to delete board entities for token {token}");
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<BoardNameEntity> GetBoardNameEntity(string boardName)
         {
             try
@@ -28,7 +76,7 @@ namespace Scoreboard.Api
             }
             catch (Exception e)
             {
-                _logger.LogError($"Could not get {nameof(BoardNameEntity)} for {boardName}", e);
+                _logger.LogError(e, $"Could not get {nameof(BoardNameEntity)} for {boardName}");
                 throw;
             }
         }
@@ -41,7 +89,7 @@ namespace Scoreboard.Api
             }
             catch (Exception e)
             {
-                _logger.LogError($"Could not get {nameof(BoardDataEntity)} for {token}", e);
+                _logger.LogError(e, $"Could not get {nameof(BoardDataEntity)} for {token}");
                 throw;
             }
         }
