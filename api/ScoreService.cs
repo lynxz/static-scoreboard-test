@@ -32,7 +32,7 @@ namespace Scoreboard.Api
             await Client.AddEntityAsync(scoreEntity);
         }
 
-        public async Task<bool> CreateTable() {
+        public async Task<bool> CreateTableAsync() {
             try {
                 await Client.CreateAsync();
 
@@ -44,6 +44,16 @@ namespace Scoreboard.Api
                     });
             } catch(Exception e) {
                 _logger.LogError(e, $"Failed to create board {_boardName}");
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<bool> DeleteTableAsync() {
+             try {
+                await Client.DeleteAsync();
+            } catch(Exception e) {
+                _logger.LogError(e, $"Failed to delete board {_boardName}");
                 return false;
             }
             return true;

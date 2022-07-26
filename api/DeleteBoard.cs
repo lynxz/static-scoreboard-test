@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Linq;
+using System.Web.Http;
 
 namespace Scoreboard.Api
 {
@@ -14,33 +15,32 @@ namespace Scoreboard.Api
     {
         [FunctionName("DeleteBoard")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "deleteboard/{boardName}/{token}")] HttpRequest req,
-            string boardName,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "deleteboard/{token}")] HttpRequest req,
             string token,
             ILogger log)
         {
-            log.LogInformation($"Deleting {boardName} and scores");
+            log.LogInformation($"Deleting board and scores for token {token}");
             try
             {
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-                var tableClient = new TableClient(connectionString, "Scoreboard");
+                var scoreBoardService = ScoreBoardService.Create(connectionString, log);
+                var boardDataEntity = await scoreBoardService.GetBoardDataEntity(token);
 
-                var scoreboardEntity = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "Token")).Value;
-                if (scoreboardEntity.Token != token) {
+                if (boardDataEntity.Token != token)
                     return new BadRequestObjectResult("Incorrect Token");
-                }
-                
-                var scores = tableClient.QueryAsync<ScoreEntity>(s => s.PartitionKey == boardName);
-                await foreach(var score in scores) {
-                    await tableClient.DeleteEntityAsync(score.PartitionKey, score.RowKey);
-                }
+
+                if (!(await scoreBoardService.RemoveBoardEntities(token)))
+                    return new InternalServerErrorResult();
+
+                var scoreService = ScoreService.Create(connectionString, boardDataEntity.TableName, log);   
+                await scoreService.DeleteTableAsync();
 
                 return new OkResult();
             }
             catch (Exception e)
             {
-                log.LogError(e, "Failed to get scoreboard data");
-                return new StatusCodeResult(500);
+                log.LogError(e, "Failed to delete scoreboard!");
+                return new InternalServerErrorResult();
             }
         }
     }

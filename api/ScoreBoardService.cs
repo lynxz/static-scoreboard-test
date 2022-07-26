@@ -34,6 +34,7 @@ namespace Scoreboard.Api
                     Token = token,
                     NumberOfEntries = 100
                 });
+                
                 await Client.AddEntityAsync(new BoardNameEntity
                 {
                     PartitionKey = shortName,
@@ -46,7 +47,6 @@ namespace Scoreboard.Api
                 _logger.LogError(e, $"Failed to create board entities for {name}");
                 return false;
             }
-
 
             return true;
         }

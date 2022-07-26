@@ -40,7 +40,7 @@ namespace Scoreboard.Api
                     return new InternalServerErrorResult();
                 }
 
-                if (!(await scoreService.CreateTable()))
+                if (!(await scoreService.CreateTableAsync()))
                 {
                     await scoreBoardService.RemoveBoardEntities(token);
                     return new InternalServerErrorResult();
