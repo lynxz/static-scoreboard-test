@@ -5,11 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Azure.Data.Tables;
 using System.Web.Http;
-using System.IO;
-using Newtonsoft.Json;
-using Azure;
 using Scoreboard.Api.Request;
 using Scoreboard.Api.Response;
 

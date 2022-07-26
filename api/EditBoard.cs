@@ -5,10 +5,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Azure.Data.Tables;
-using System.IO;
-using Newtonsoft.Json;
 using Scoreboard.Api.Request;
+using System.Web.Http;
 
 namespace Scoreboard.Api
 {
@@ -22,25 +20,27 @@ namespace Scoreboard.Api
             ILogger log)
         {
             log.LogInformation($"Editing {boardName} and scores");
+
+            (bool success, UpdateBoardDto updateBoard) = await req.GetDataAsync<UpdateBoardDto>(log);
+            if (!success)
+                return new BadRequestErrorMessageResult("Failed to parse data");
+
             try
             {
                 var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-                var tableClient = new TableClient(connectionString, "Scoreboard");
+                var scoreBoardService = ScoreBoardService.Create(connectionString, log);
 
-                var scoreboardEntity = (await tableClient.GetEntityAsync<BoardDataEntity>(boardName, "Token")).Value;
-                if (scoreboardEntity.Token != token) 
+                var scoreboardEntity = await scoreBoardService.GetBoardDataEntity(token);
+                if (scoreboardEntity.Token != token)
                     return new BadRequestObjectResult("Incorrect Token");
-
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var updateBoard = JsonConvert.DeserializeObject<UpdateBoardDto>(requestBody);
 
                 if (updateBoard.NumberOfEntries < 1)
                     return new BadRequestObjectResult("Number of entries must be at least 1");
-                
+
                 scoreboardEntity.NumberOfEntries = updateBoard.NumberOfEntries;
                 scoreboardEntity.Email = updateBoard.Email;
 
-                var response = tableClient.UpdateEntity(scoreboardEntity, Azure.ETag.All);
+                var response = scoreBoardService.Client.UpdateEntity(scoreboardEntity, Azure.ETag.All);
                 if (response.IsError)
                     return new StatusCodeResult(response.Status);
 
